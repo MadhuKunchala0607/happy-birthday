@@ -73,7 +73,7 @@ const sendBirthdayEmails = async () => {
             from: process.env.EMAIL_USER,
             to: birthday.email,
             subject: 'Happy Birthday!',
-            text: `Happy Birthday, ${birthday.name}! 🎉`
+            text: `Happy Birthday, ${birthday.name}!   Wishing you a day filled with love, laughter, and happiness! May all your dreams and wishes come true as you celebrate this special day. Have an amazing year ahead, full of joy and success! 🎈🎁🎉🎉`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
