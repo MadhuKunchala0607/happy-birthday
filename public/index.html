@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav">
+        <div class="logo"><h1>Happy Birthday</h1></div>
+        <div class="navlinks">
+            <li><a href="">Home</a></li>
+            <li><a href="">About</a></li>
+            <li><a href="birthday.html">view all Birthdays</a></li>
+        </div>
+    </div>
+    <div class="cont">
+        <form>
+            <div class="segment">
+                <h1>Birth <span style="color: #AE1100;">day</span> Remainder</h1>
+            </div>
+            <label>
+                <input type="text" placeholder="Enter your Name" id="name" />
+            </label>
+            <label>
+                <input type="email" placeholder="Email Address" id="email" />
+            </label>
+            <label>
+                <input type="date" id="date" />
+            </label>
+            <button class="red" id="btn" type="button">Add your Birthday</button>
+            <div class="segment">
+                <button class="unit" type="button"><i class="icon ion-md-arrow-back"></i></button>
+                <button class="unit" type="button"><i class="icon ion-md-bookmark"></i></button>
+                <button class="unit" type="button"><i class="icon ion-md-settings"></i></button>
+            </div>
+        </form>
+        <div class="box" id="result"></div>
+    </div>
+    <script src="script.js"></script>  
+</body>
+</html>

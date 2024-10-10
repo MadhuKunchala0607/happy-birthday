@@ -1,0 +1,96 @@
+/* Container for multiple cards */
+.cont{
+    height: 100vh;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    align-items: center;
+    justify-content: center;
+    background-color:  #EBECF0;
+  }
+  .profile-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Flexible grid with a minimum card width of 200px */
+    gap: 20px; /* Adds space between the cards */
+    width: 100%; /* Full width of the container */
+    padding: 20px; /* Padding inside the container */
+    box-sizing: border-box; /* Make sure padding doesn't affect the total width */
+  }
+  
+  /* Individual profile card styling */
+  .profile-card {
+    background: #FFF;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+    height: 50vh; /* Fade-in effect */
+  }
+  
+  /* Profile card hover effect */
+  .profile-card:hover {
+    transform: translateY(-10px); /* Slight pop-up effect */
+  }
+  
+  /* Header styles for each profile card */
+  .profile-card header {
+    background: #EBECF0;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .profile-card header h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333; /* Text color */
+  }
+  
+  .profile-card header a img {
+    width: 60px;
+    height: 80px; /* Ensures the image is square */
+    border-radius: 50%;
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.2);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .profile-card header a:hover img {
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Bio and additional content inside profile cards */
+  .profile-bio {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .profile-bio h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #AE1100;
+  }
+  
+  .profile-bio p {
+    color: #666;
+  }
+  
+  /* Fade-in animation */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive adjustments */
+  @media screen and (max-width: 768px) {
+    .profile-card-container {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards on smaller screens */
+    }
+  }
+  
