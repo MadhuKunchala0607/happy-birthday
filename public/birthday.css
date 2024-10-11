@@ -48,8 +48,8 @@
   }
   
   .profile-card header a img {
-    width: 60px;
-    height: 80px; /* Ensures the image is square */
+    width: 80px;
+    height: 90px; /* Ensures the image is square */
     border-radius: 50%;
     box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.2);
     transition: box-shadow 0.3s ease;
@@ -93,4 +93,5 @@
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards on smaller screens */
     }
   }
+ 
   

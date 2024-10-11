@@ -1,3 +1,14 @@
+// Array of image URLs
+const imageArray = [
+    'bimg1.jpg',
+    'bimg2.jpg',
+    'bimg3.jpg',
+    'bimg4.jpg',
+    'bimg5.jpg',
+    'bimg6.jpg',
+    'img.jpg'
+];
+
 // Function to fetch and display all birthday data
 function fetchAndDisplayBirthdays() {
     fetch('/birthdays') // Fetch all birthdays from the database
@@ -21,17 +32,18 @@ function fetchAndDisplayBirthdays() {
 
             const today = new Date();
             data.forEach((val) => {
-                // Check if val.date is a string and convert it to a Date object
-                const happy_birthday = new Date(val.date); // Accessing date from the database
+                // Convert the birthday date from the database to a Date object
+                const happy_birthday = new Date(val.date); 
 
                 // Check if the date is valid
                 if (isNaN(happy_birthday)) {
                     console.error('Invalid date:', val.date);
-                    return; // Skip this iteration if date is invalid
+                    return; // Skip this iteration if the date is invalid
                 }
 
-                console.log(happy_birthday);
-
+                // Get a random image from the array
+                const randomImage = imageArray[Math.floor(Math.random() * imageArray.length)];
+                
                 // Create the profile card elements
                 const containerDiv = document.createElement('div');
                 containerDiv.className = 'profile-card-container';
@@ -41,18 +53,15 @@ function fetchAndDisplayBirthdays() {
 
                 const header = document.createElement('header');
 
-                const h1 = document.createElement('h1');
-
                 const link = document.createElement('a');
                 link.href = '#';
 
-                // Use a user-specific image if available, else a default image
+                // Use the random image
                 const img = document.createElement('img');
-                img.src = 'img.jpg'; // Replace with dynamic user image if applicable
+                img.src = randomImage; // Set the random image URL
                 img.alt = 'Profile Picture';
 
                 link.appendChild(img);
-                header.appendChild(h1);
                 header.appendChild(link);
 
                 const bioDiv = document.createElement('div');
