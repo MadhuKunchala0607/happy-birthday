@@ -35,15 +35,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return response.json();
         })
-        .then(() => {
-            alert("Your birthday is saved.");
-            upcome(); // Fetch and display all birthdays
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-            alert('Error saving birthday. Please try again.');
-        });
+        showPopupDialog(name);
+      
     });
+    function showPopupDialog(name) {
+        // Create the dialog box container
+        var dialogBox = document.createElement("div");
+        dialogBox.classList.add("dialog-box");
+
+        // Create the content for the dialog box
+        var dialogContent = `
+            <div class="dialog-content">
+                <h3>Hey ${name},</h3>
+                <p>Your birthday has been registered successfully!
+                You will receive greetings on your special day. 🎉</p>
+                <button id="closeDialog">Okay</button>
+            </div>
+        `;
+        dialogBox.innerHTML = dialogContent;
+
+        // Add the dialog box to the body
+        document.body.appendChild(dialogBox);
+
+        // Add event listener to close the dialog
+        var closeButton = document.getElementById("closeDialog");
+        closeButton.addEventListener("click", () => {
+            document.body.removeChild(dialogBox);
+        });
+    }
 
     // Function to fetch, calculate days, sort, and display top 5 nearest birthdays
     async function upcome() {
