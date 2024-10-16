@@ -35,15 +35,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return response.json();
         })
-        showPopupDialog(name);
-      
+        .then(() => {
+            showPopupDialog(name);
+            upcome(); // Refresh the list of upcoming birthdays
+        })
+        .catch(error => {
+            console.error('Error adding birthday:', error);
+        });
     });
+
     function showPopupDialog(name) {
-        // Create the dialog box container
         var dialogBox = document.createElement("div");
         dialogBox.classList.add("dialog-box");
 
-        // Create the content for the dialog box
         var dialogContent = `
             <div class="dialog-content">
                 <h3>Hey ${name},</h3>
@@ -54,63 +58,64 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         dialogBox.innerHTML = dialogContent;
 
-        // Add the dialog box to the body
         document.body.appendChild(dialogBox);
 
-        // Add event listener to close the dialog
         var closeButton = document.getElementById("closeDialog");
         closeButton.addEventListener("click", () => {
             document.body.removeChild(dialogBox);
         });
     }
 
-    // Function to fetch, calculate days, sort, and display top 5 nearest birthdays
     async function upcome() {
         try {
-            const response = await fetch('/birthdays'); // Fetch birthday data from server
-            const apidata = await response.json(); // Parse JSON response
+            const response = await fetch('/birthdays'); 
+            const apidata = await response.json(); 
 
-            // Clear previous birthday messages, but keep the heading
-            const heading = resultContainer.querySelector("h1"); // Get the heading
-            resultContainer.innerHTML = ''; // Clear previous results
+            const heading = resultContainer.querySelector("h1"); 
+            resultContainer.innerHTML = ''; 
 
-            // Re-append the heading
             if (heading) {
                 resultContainer.appendChild(heading);
             }
 
             const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize today's date to avoid time discrepancies
 
-            // Calculate days remaining and sort the birthdays
             const birthdaysWithDays = apidata.map(birthday => {
                 const birthdayDate = new Date(birthday.date);
                 let nextBirthday = new Date(today.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
+                nextBirthday.setHours(0, 0, 0, 0); // Normalize nextBirthday date
 
-                // If the birthday this year has passed, consider the next year's birthday
+                // If the next birthday is in the past, move it to the next year
                 if (today > nextBirthday) {
                     nextBirthday.setFullYear(today.getFullYear() + 1);
                 }
 
+                // Calculate the number of days until the next birthday
                 const differenceInTime = nextBirthday - today;
                 const daysUntilNextBirthday = Math.floor(differenceInTime / (1000 * 60 * 60 * 24));
 
                 return {
                     ...birthday,
-                    nextBirthday: nextBirthday.toLocaleDateString(), // Format the date nicely
+                    nextBirthday: nextBirthday.toLocaleDateString(),
                     daysUntilNextBirthday
                 };
             });
 
-            // Sort birthdays based on the number of days remaining, and take the top 5
+            // Clear input fields after adding a birthday
+            document.getElementById("name").value = "";
+            document.getElementById("date").value = "";
+            document.getElementById("email").value = "";
+
+          
             const sortedBirthdays = birthdaysWithDays.sort((a, b) => a.daysUntilNextBirthday - b.daysUntilNextBirthday).slice(0, 5);
 
-            // Display the sorted birthdays
             sortedBirthdays.forEach(birthday => {
                 var para = document.createElement("p");
-                
+
                 const humor = birthday.daysUntilNextBirthday === 0
                     ? `🎉 Today is ${birthday.name}'s birthday! Time to party! 🥳`
-                    : `Just ${birthday.daysUntilNextBirthday + 1} more days until ${birthday.name}'s birthday on ${birthday.nextBirthday}. Get ready for the cake! 🎂`;
+                    : `Just ${birthday.daysUntilNextBirthday} more days until ${birthday.name}'s birthday on ${birthday.nextBirthday}. Get ready for the cake! 🎂`;
 
                 para.innerText = humor;
 
@@ -118,10 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 deleteButton.innerText = "Delete";
                 deleteButton.style.color = "#AE1100";
 
-                // Event listener to delete the birthday reminder (UI only, add server-side handling)
                 deleteButton.addEventListener("click", () => {
                     resultContainer.removeChild(para);
-                    // Optionally: Send a request to server to delete this birthday
                 });
 
                 para.appendChild(deleteButton);
@@ -133,5 +136,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    upcome(); // Initial call to display upcoming birthdays on page load
+    upcome(); // Fetch upcoming birthdays on page load
 });

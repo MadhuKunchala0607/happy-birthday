@@ -9,20 +9,20 @@ const imageArray = [
     'img.jpg'
 ];
 
-// Function to fetch and display all birthday data
+
 function fetchAndDisplayBirthdays() {
-    fetch('/birthdays') // Fetch all birthdays from the database
+    fetch('/birthdays') 
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json(); // Parse the JSON response
+            return response.json(); 
         })
         .then(data => {
             const container = document.getElementsByClassName("cont")[0];
-            const fragment = document.createDocumentFragment(); // Use DocumentFragment for performance
+            const fragment = document.createDocumentFragment(); 
 
-            // Check if there are no birthdays
+         
             if (data.length === 0) {
                 const noBirthdaysMessage = document.createElement('p');
                 noBirthdaysMessage.textContent = 'No birthdays to display.';
@@ -32,19 +32,18 @@ function fetchAndDisplayBirthdays() {
 
             const today = new Date();
             data.forEach((val) => {
-                // Convert the birthday date from the database to a Date object
+            
                 const happy_birthday = new Date(val.date); 
 
-                // Check if the date is valid
+             
                 if (isNaN(happy_birthday)) {
                     console.error('Invalid date:', val.date);
-                    return; // Skip this iteration if the date is invalid
+                    return; 
                 }
 
-                // Get a random image from the array
                 const randomImage = imageArray[Math.floor(Math.random() * imageArray.length)];
                 
-                // Create the profile card elements
+            
                 const containerDiv = document.createElement('div');
                 containerDiv.className = 'profile-card-container';
 
@@ -80,11 +79,11 @@ function fetchAndDisplayBirthdays() {
                 profileCardDiv.appendChild(bioDiv);
                 containerDiv.appendChild(profileCardDiv);
 
-                // Append to the document fragment instead of the DOM directly
+           
                 fragment.appendChild(containerDiv);
             });
 
-            // Append the fragment to the container in the HTML
+         
             container.appendChild(fragment);
         })
         .catch(error => {
@@ -96,5 +95,5 @@ function fetchAndDisplayBirthdays() {
         });
 }
 
-// Call the function to fetch and display birthdays when the page loads
+
 window.onload = fetchAndDisplayBirthdays;

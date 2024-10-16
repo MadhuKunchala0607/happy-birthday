@@ -1,9 +1,8 @@
-// routes/birthdays.js
+
 const express = require('express');
-const Birthday = require('../models/Birthday'); // Adjust the path as necessary
+const Birthday = require('../models/Birthday'); 
 const router = express.Router();
 
-// Get all birthdays
 router.get('/', async (req, res) => {
     try {
         const birthdays = await Birthday.find({});

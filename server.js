@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const cron = require('node-cron');
 
 const app = express();
 app.use(bodyParser.json());
@@ -59,12 +60,16 @@ const transporter = nodemailer.createTransport({
 // Function to send birthday emails
 const sendBirthdayEmails = async () => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight
+    const todayMonth = today.getMonth();
+    const todayDate = today.getDate();
 
+    // Find birthdays matching today's month and day, regardless of the year
     const birthdaysToday = await Birthday.find({
-        date: {
-            $gte: today,
-            $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // Get the range for today
+        $expr: {
+            $and: [
+                { $eq: [{ $month: "$date" }, todayMonth + 1] }, // MongoDB month is 1-based
+                { $eq: [{ $dayOfMonth: "$date" }, todayDate] }
+            ]
         }
     });
 
@@ -73,7 +78,7 @@ const sendBirthdayEmails = async () => {
             from: process.env.EMAIL_USER,
             to: birthday.email,
             subject: 'Happy Birthday!',
-            text: `Happy Birthday, ${birthday.name}!   Wishing you a day filled with love, laughter, and happiness! May all your dreams and wishes come true as you celebrate this special day. Have an amazing year ahead, full of joy and success! 🎈🎁🎉🎉`
+            text: `Happy Birthday, ${birthday.name}! Wishing you a day filled with love, laughter, and happiness! May all your dreams and wishes come true as you celebrate this special day. Have an amazing year ahead, full of joy and success! 🎈🎁🎉`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -85,10 +90,7 @@ const sendBirthdayEmails = async () => {
     });
 };
 
-// Call the function when the server starts
-sendBirthdayEmails(); // This will send emails for today if there are any birthdays
-
-// Endpoint to send birthday emails manually
+// Endpoint to trigger sending birthday emails manually
 app.get('/send-birthday-emails', async (req, res) => {
     try {
         await sendBirthdayEmails();
@@ -97,6 +99,14 @@ app.get('/send-birthday-emails', async (req, res) => {
         console.error('Error sending birthday emails:', error);
         res.status(500).json({ error: 'Error sending birthday emails' });
     }
+});
+
+// Schedule the job to run daily at 12 AM
+cron.schedule('0 0 * * *', () => {
+    console.log('Running scheduled task to send birthday emails');
+    sendBirthdayEmails().catch(error => {
+        console.error('Error running sendBirthdayEmails:', error);
+    });
 });
 
 // Start the server
