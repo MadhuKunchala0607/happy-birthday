@@ -14,12 +14,13 @@ router.get('/', async (req, res) => {
 
 // Add a new birthday
 router.post('/', async (req, res) => {
-    const { name, email, date } = req.body;
+    const { name, email, date,gender } = req.body;
 
     const birthday = new Birthday({
         name,
         email,
         date,
+        gender
     });
 
     try {

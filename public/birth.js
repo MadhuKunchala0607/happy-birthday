@@ -9,7 +9,6 @@ const imageArray = [
     'img.jpg'
 ];
 
-
 function fetchAndDisplayBirthdays() {
     fetch('/birthdays') 
         .then(response => {
@@ -22,7 +21,8 @@ function fetchAndDisplayBirthdays() {
             const container = document.getElementsByClassName("cont")[0];
             const fragment = document.createDocumentFragment(); 
 
-         
+            container.innerHTML = ''; // Clear previous content
+
             if (data.length === 0) {
                 const noBirthdaysMessage = document.createElement('p');
                 noBirthdaysMessage.textContent = 'No birthdays to display.';
@@ -32,20 +32,18 @@ function fetchAndDisplayBirthdays() {
 
             const today = new Date();
             data.forEach((val) => {
-            
                 const happy_birthday = new Date(val.date); 
 
-             
                 if (isNaN(happy_birthday)) {
                     console.error('Invalid date:', val.date);
                     return; 
                 }
 
                 const randomImage = imageArray[Math.floor(Math.random() * imageArray.length)];
-                
-            
+
                 const containerDiv = document.createElement('div');
                 containerDiv.className = 'profile-card-container';
+                containerDiv.dataset.name = val.name.toLowerCase(); // Store name for search filtering
 
                 const profileCardDiv = document.createElement('div');
                 profileCardDiv.className = 'profile-card';
@@ -55,10 +53,17 @@ function fetchAndDisplayBirthdays() {
                 const link = document.createElement('a');
                 link.href = '#';
 
-                // Use the random image
                 const img = document.createElement('img');
-                img.src = randomImage; // Set the random image URL
+                if(val.gender=="male"){
+                img.src = "bimg1.jpg"; 
                 img.alt = 'Profile Picture';
+                }
+                else{
+                    
+                     img.src = "bimg6.jpg"; 
+                      
+
+                }
 
                 link.appendChild(img);
                 header.appendChild(link);
@@ -67,23 +72,26 @@ function fetchAndDisplayBirthdays() {
                 bioDiv.className = 'profile-bio';
 
                 const h2 = document.createElement('h2');
-                h2.textContent = val.name; // Accessing name from the database
+                h2.textContent = `${val.name}`;
 
                 const p = document.createElement('p');
                 p.textContent = `DOB: ${happy_birthday.toLocaleDateString()} ${today.getMonth() === happy_birthday.getMonth() && today.getDate() === happy_birthday.getDate() ? 'Celebrating birthday today' : ''}`;
+                const line=document.createElement("p")
+                line.innerText= ` More ${val.days} days to go to celebrate birthday `
+
+             
 
                 bioDiv.appendChild(h2);
+                bioDiv.appendChild(line)
                 bioDiv.appendChild(p);
 
                 profileCardDiv.appendChild(header);
                 profileCardDiv.appendChild(bioDiv);
                 containerDiv.appendChild(profileCardDiv);
 
-           
                 fragment.appendChild(containerDiv);
             });
 
-         
             container.appendChild(fragment);
         })
         .catch(error => {
@@ -95,5 +103,24 @@ function fetchAndDisplayBirthdays() {
         });
 }
 
+function setupSearch() {
+    const searchInput = document.getElementById("text");
+    searchInput.addEventListener("input", () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const cards = document.querySelectorAll(".profile-card-container");
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            if (name.includes(searchTerm)) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+}
 
-window.onload = fetchAndDisplayBirthdays;
+window.onload = () => {
+    fetchAndDisplayBirthdays();
+    setupSearch(); 
+};

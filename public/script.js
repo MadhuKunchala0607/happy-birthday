@@ -10,16 +10,35 @@ document.addEventListener("DOMContentLoaded", () => {
         var name = document.getElementById("name").value;
         var dob = document.getElementById("date").value;
         var email = document.getElementById("email").value;
+        var gender=document.getElementById("gen").value;
 
         if (!name || !dob || !email) {
             alert("Please fill in all fields.");
             return;
         }
 
+        // Calculate days until next birthday
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const birthdayDate = new Date(dob);
+        let nextBirthday = new Date(today.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
+        nextBirthday.setHours(0, 0, 0, 0);
+
+        // If the next birthday is in the past, move it to the next year
+        if (today > nextBirthday) {
+            nextBirthday.setFullYear(today.getFullYear() + 1);
+        }
+
+        const differenceInTime = nextBirthday - today;
+        const daysUntilNextBirthday = Math.floor(differenceInTime / (1000 * 60 * 60 * 24));
+
+        // Create the birthdayData object with the calculated daysUntilNextBirthday
         var birthdayData = {
             name: name,
             email: email,
-            date: dob
+            date: dob,
+            days: daysUntilNextBirthday,
+            gender:gender
         };
 
         fetch('/birthdays', {
@@ -37,6 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(() => {
             showPopupDialog(name);
+            // Clear input fields after adding a birthday
+            document.getElementById("name").value = "";
+            document.getElementById("date").value = "";
+            document.getElementById("email").value = "";
             upcome(); // Refresh the list of upcoming birthdays
         })
         .catch(error => {
@@ -68,30 +91,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function upcome() {
         try {
-            const response = await fetch('/birthdays'); 
-            const apidata = await response.json(); 
+            const response = await fetch('/birthdays');
+            const apidata = await response.json();
 
-            const heading = resultContainer.querySelector("h1"); 
-            resultContainer.innerHTML = ''; 
-
-            if (heading) {
-                resultContainer.appendChild(heading);
-            }
+            resultContainer.innerHTML = '';
+            resultContainer.appendChild(text);
 
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalize today's date to avoid time discrepancies
+            today.setHours(0, 0, 0, 0);
 
             const birthdaysWithDays = apidata.map(birthday => {
                 const birthdayDate = new Date(birthday.date);
                 let nextBirthday = new Date(today.getFullYear(), birthdayDate.getMonth(), birthdayDate.getDate());
-                nextBirthday.setHours(0, 0, 0, 0); // Normalize nextBirthday date
+                nextBirthday.setHours(0, 0, 0, 0);
 
-                // If the next birthday is in the past, move it to the next year
                 if (today > nextBirthday) {
                     nextBirthday.setFullYear(today.getFullYear() + 1);
                 }
 
-                // Calculate the number of days until the next birthday
                 const differenceInTime = nextBirthday - today;
                 const daysUntilNextBirthday = Math.floor(differenceInTime / (1000 * 60 * 60 * 24));
 
@@ -102,12 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
             });
 
-            // Clear input fields after adding a birthday
-            document.getElementById("name").value = "";
-            document.getElementById("date").value = "";
-            document.getElementById("email").value = "";
-
-          
             const sortedBirthdays = birthdaysWithDays.sort((a, b) => a.daysUntilNextBirthday - b.daysUntilNextBirthday).slice(0, 5);
 
             sortedBirthdays.forEach(birthday => {
@@ -136,5 +147,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    upcome(); // Fetch upcoming birthdays on page load
+    upcome();
 });

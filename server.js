@@ -4,10 +4,11 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
+const moment = require('moment-timezone'); // Import moment-timezone
 
 const app = express();
 app.use(bodyParser.json());
-app.use(express.static('public')); // Serve static files from the public directory
+app.use(express.static('public'));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -18,7 +19,9 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 const birthdaySchema = new mongoose.Schema({
     name: String,
     email: String,
-    date: Date
+    date: Date,
+    days: Number,
+    gender: String
 });
 
 const Birthday = mongoose.model('Birthday', birthdaySchema);
@@ -36,8 +39,15 @@ app.get('/birthdays', async (req, res) => {
 
 // Endpoint to add a birthday
 app.post('/birthdays', async (req, res) => {
-    const { name, email, date } = req.body;
-    const newBirthday = new Birthday({ name, email, date });
+    const { name, email, date, days, gender } = req.body;
+
+    const newBirthday = new Birthday({
+        name,
+        email,
+        date,
+        days,
+        gender
+    });
 
     try {
         const savedBirthday = await newBirthday.save();
@@ -63,11 +73,10 @@ const sendBirthdayEmails = async () => {
     const todayMonth = today.getMonth();
     const todayDate = today.getDate();
 
-    // Find birthdays matching today's month and day, regardless of the year
     const birthdaysToday = await Birthday.find({
         $expr: {
             $and: [
-                { $eq: [{ $month: "$date" }, todayMonth + 1] }, // MongoDB month is 1-based
+                { $eq: [{ $month: "$date" }, todayMonth + 1] },
                 { $eq: [{ $dayOfMonth: "$date" }, todayDate] }
             ]
         }
@@ -78,7 +87,21 @@ const sendBirthdayEmails = async () => {
             from: process.env.EMAIL_USER,
             to: birthday.email,
             subject: 'Happy Birthday!',
-            text: `Happy Birthday, ${birthday.name}! Wishing you a day filled with love, laughter, and happiness! May all your dreams and wishes come true as you celebrate this special day. Have an amazing year ahead, full of joy and success! 🎈🎁🎉`
+            html: `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+                    <h1 style="color: #5C67F2;">Happy Birthday, ${birthday.name}!</h1>
+                    <h3 style="color: #333;">🎂 Wishing You a Day Filled with Joy 🎂</h3>
+                    <p style="font-size: 18px; color: #555;">
+                        "Count your life by smiles, not tears. Count your age by friends, not years."
+                    </p>
+                    <p style="font-size: 16px; color: #777;">
+                        We hope you have a fantastic day filled with love, laughter, and all the things that bring you happiness. Enjoy your special day!
+                    </p>
+                    <div style="margin-top: 30px;">
+                        <img src="https://cdn.vectorstock.com/i/500p/03/34/birthday-cake-vector-1130334.jpg" alt="Birthday Cake" style="width: 100px; height: auto;"/>
+                    </div>
+                </div>
+            `
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -90,27 +113,23 @@ const sendBirthdayEmails = async () => {
     });
 };
 
-// Endpoint to trigger sending birthday emails manually
-app.get('/send-birthday-emails', async (req, res) => {
-    try {
-        await sendBirthdayEmails();
-        res.json({ message: 'Birthday emails sent!' });
-    } catch (error) {
-        console.error('Error sending birthday emails:', error);
-        res.status(500).json({ error: 'Error sending birthday emails' });
-    }
-});
+// Schedule the job to run daily at 12 AM in the specified timezone
+const timeZone = 'Asia/Kolkata'; // Change this to your preferred timezone
 
-// Schedule the job to run daily at 12 AM
 cron.schedule('0 0 * * *', () => {
     console.log('Running scheduled task to send birthday emails');
+    const currentTime = moment().tz(timeZone).format('HH:mm');
+    console.log(`Current time in ${timeZone}: ${currentTime}`);
+
     sendBirthdayEmails().catch(error => {
         console.error('Error running sendBirthdayEmails:', error);
     });
+}, {
+    timezone: timeZone
 });
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
