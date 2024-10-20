@@ -3,6 +3,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
+const moment = require('moment-timezone');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -16,7 +17,8 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 const birthdaySchema = new mongoose.Schema({
     name: String,
     email: String,
-    date: Date
+    date: Date,
+    gender: String // Include gender if needed
 });
 
 const Birthday = mongoose.model('Birthday', birthdaySchema);
@@ -32,13 +34,18 @@ const transporter = nodemailer.createTransport({
 
 // Function to send birthday emails
 const sendBirthdayEmails = async () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight
+    const today = moment().tz('Asia/Kolkata'); // Set to your timezone
+    const currentMonth = today.month(); // Get current month (0-11)
+    const currentDate = today.date(); // Get current date (1-31)
+
+    console.log(`Checking for birthdays on: ${currentDate}-${currentMonth + 1}`);
 
     const birthdaysToday = await Birthday.find({
-        date: {
-            $gte: today,
-            $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // Get the range for today
+        $expr: {
+            $and: [
+                { $eq: [{ $dayOfMonth: "$date" }, currentDate] },
+                { $eq: [{ $month: "$date" }, currentMonth + 1] } // Months are 1-indexed in MongoDB
+            ]
         }
     });
 
@@ -48,24 +55,33 @@ const sendBirthdayEmails = async () => {
     }
 
     birthdaysToday.forEach(birthday => {
+        const birthDate = moment(birthday.date);
+        const age = today.diff(birthDate, 'years');
+        const weeks = today.diff(birthDate, 'weeks');
+        const days = today.diff(birthDate, 'days');
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: birthday.email,
             subject: 'Happy Birthday!',
-            html: ` <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
-                <h1 style="color: #5C67F2;">Happy Birthday, ${birthday.name}!</h1>
-                <h3 style="color: #333;">🎂 Wishing You a Day Filled with Joy 🎂</h3>
-                <p style="font-size: 18px; color: #555;">
-                    "Count your life by smiles, not tears. Count your age by friends, not years."
-                </p>
-                <p style="font-size: 16px; color: #777;">
-                    We hope you have a fantastic day filled with love, laughter, and all the things that bring you happiness. Enjoy your special day!
-                </p>
-                <div style="margin-top: 30px;">
-                    <img src="https://cdn.vectorstock.com/i/500p/03/34/birthday-cake-vector-1130334.jpg" alt="Birthday Cake" style="width: 100px; height: auto;"/>
+            html: `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+                    <h1 style="color: #5C67F2;">Happy Birthday, ${birthday.name}!</h1>
+                    <h3 style="color: #333;">🎂 Wishing You a Day Filled with Joy 🎂</h3>
+                    <p style="font-size: 18px; color: #555;">
+                        "Count your life by smiles, not tears. Count your age by friends, not years."
+                    </p>
+                    <p style="font-size: 16px; color: #777;">
+                        You are now <strong>${age} years, ${weeks} weeks, and ${days} days</strong> old!
+                    </p>
+                    <p style="font-size: 16px; color: #777;">
+                        We hope you have a fantastic day filled with love, laughter, and all the things that bring you happiness. Enjoy your special day!
+                    </p>
+                    <div style="margin-top: 30px;">
+                        <img src="https://cdn.vectorstock.com/i/500p/03/34/birthday-cake-vector-1130334.jpg" alt="Birthday Cake" style="width: 100px; height: auto;"/>
+                    </div>
                 </div>
-            </div>
-        `
+            `
         };
 
         transporter.sendMail(mailOptions, (error, info) => {

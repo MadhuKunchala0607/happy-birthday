@@ -19,8 +19,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 const birthdaySchema = new mongoose.Schema({
     name: String,
     email: String,
-    date: Date,
-    days: Number,
+    date: Date,  // Ensure this date is in UTC
     gender: String
 });
 
@@ -39,13 +38,15 @@ app.get('/birthdays', async (req, res) => {
 
 // Endpoint to add a birthday
 app.post('/birthdays', async (req, res) => {
-    const { name, email, date, days, gender } = req.body;
+    const { name, email, date, gender } = req.body;
+
+    // Ensure date is converted to UTC before saving
+    const dateInUTC = moment(date).utc().toDate();
 
     const newBirthday = new Birthday({
         name,
         email,
-        date,
-        days,
+        date: dateInUTC,
         gender
     });
 
@@ -69,20 +70,25 @@ const transporter = nodemailer.createTransport({
 
 // Function to send birthday emails
 const sendBirthdayEmails = async () => {
-    const today = new Date();
-    const todayMonth = today.getMonth();
-    const todayDate = today.getDate();
+    const today = moment().tz('Asia/Kolkata'); // Change to your timezone
+    const todayMonth = today.month() + 1; // moment.js month is 0-indexed
+    const todayDate = today.date();
 
     const birthdaysToday = await Birthday.find({
         $expr: {
             $and: [
-                { $eq: [{ $month: "$date" }, todayMonth + 1] },
+                { $eq: [{ $month: "$date" }, todayMonth] },
                 { $eq: [{ $dayOfMonth: "$date" }, todayDate] }
             ]
         }
     });
 
     birthdaysToday.forEach(birthday => {
+        const birthDate = moment(birthday.date);
+        const age = today.diff(birthDate, 'years');
+        const weeks = today.diff(birthDate, 'weeks');
+        const days = today.diff(birthDate, 'days');
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: birthday.email,
@@ -93,6 +99,9 @@ const sendBirthdayEmails = async () => {
                     <h3 style="color: #333;">🎂 Wishing You a Day Filled with Joy 🎂</h3>
                     <p style="font-size: 18px; color: #555;">
                         "Count your life by smiles, not tears. Count your age by friends, not years."
+                    </p>
+                    <p style="font-size: 16px; color: #777;">
+                        You are now <strong>${age} years, ${weeks} weeks, and ${days} days</strong> old!
                     </p>
                     <p style="font-size: 16px; color: #777;">
                         We hope you have a fantastic day filled with love, laughter, and all the things that bring you happiness. Enjoy your special day!
@@ -113,19 +122,16 @@ const sendBirthdayEmails = async () => {
     });
 };
 
-// Schedule the job to run daily at 12 AM in the specified timezone
-const timeZone = 'Asia/Kolkata'; // Change this to your preferred timezone
-
+// Schedule the job to run daily at midnight in the specified timezone
 cron.schedule('0 0 * * *', () => {
     console.log('Running scheduled task to send birthday emails');
-    const currentTime = moment().tz(timeZone).format('HH:mm');
-    console.log(`Current time in ${timeZone}: ${currentTime}`);
-
-    sendBirthdayEmails().catch(error => {
-        console.error('Error running sendBirthdayEmails:', error);
-    });
+    sendBirthdayEmails()
+        .then(() => console.log('Birthday email task completed'))
+        .catch(error => {
+            console.error('Error running sendBirthdayEmails:', error);
+        });
 }, {
-    timezone: timeZone
+    timezone: 'Asia/Kolkata' // Change this to your preferred timezone
 });
 
 // Start the server
