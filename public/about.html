@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Birthday Reminder</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Existing styles... */
+        
+        :root {
+            --ruler: 16px;
+            --color-red: #AE1100;
+            --color-bg: #EBECF0;
+            --color-shadow: #BABECC;
+            --color-white: #FFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            background-color: var(--color-bg);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: -0.2px;
+            font-size: var(--ruler);
+        }
+
+        div,
+        p {
+           
+            text-shadow: 1px 1px 1px var(--color-white);
+        }
+
+        .nav {
+            display: flex;
+            
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .navlinks li {
+            display: inline;
+            margin: 20px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .cont {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .segment {
+            padding: calc(var(--ruler) * 2) 0;
+            text-align: center;
+        }
+
+        .box {
+            padding: var(--ruler);
+            box-shadow: -5px -5px 20px var(--color-white), 5px 5px 20px var(--color-shadow);
+            text-shadow: 1px 1px 1px var(--color-white);
+            color: #61677C;
+            font-weight: bold;
+            font-size: var(--ruler);
+            margin: 20px;
+            width: 100%;
+            max-width: 800px; /* Adjusts max width of the box */
+            text-align: left;
+            background-color: var(--color-white);
+            border-radius: 10px;
+            display: flex; /* Added for flexbox layout */
+            flex-direction: column; /* Aligns items in a row */
+            align-items: flex-start; /* Aligns items at the start vertically */
+            justify-content: center;
+        }
+
+        .about-image {
+            flex: 1; /* Takes up 1/3 of the box */
+            padding: 20px;
+        }
+
+        .about-image img {
+            width: 100%; /* Makes the image responsive */
+            height: auto; /* Keeps aspect ratio */
+            border-radius: 10px; /* Adds rounded corners to the image */
+        }
+
+        .about-text {
+            flex: 2; /* Takes up 2/3 of the box */
+            padding: 50px;
+            line-height: 280%;
+            color: black;
+        }
+
+        .project-title {
+            font-size: 1.5em; /* Increase title size */
+            font-weight: bold; /* Make title bold */
+            color: #61677C; /* Title color */
+            margin-bottom: 10px; /* Space between title and box */
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--color-white);
+            color: var(--color-shadow);
+            position: relative; /* Ensures footer stays at the bottom */
+            margin-top: 20px;
+            border-top: 1px solid var(--color-shadow);
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0; /* Removes default margin for paragraphs in footer */
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .box {
+                flex-direction: column; /* Stacks image and text vertically */
+                width: 90%; /* Make the box wider on smaller screens */
+            }
+            .about-image, .about-text {
+                flex: none; /* Reset flex property */
+                width: 100%; /* Full width on small screens */
+                padding: 10px; /* Adjust padding */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .box {
+                padding: 10px; /* Adjust padding on extra-small screens */
+            }
+        }
+        /* Basic styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styling */
+header {
+    text-align: left;
+    padding: 10px 20px;
+}
+
+/* Navigation styling */
+nav {
+    text-align: right;
+    padding: 10px 20px;
+}
+
+/* Main container styling */
+.container {
+    max-width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* About section title styling */
+.about-title {
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+/* Paragraph styling */
+p {
+    line-height: 4.3;
+    font-size: 1em;
+    color: #333;
+}
+
+/* Footer styling */
+footer {
+    text-align: center;
+    padding: 10px 20px;
+    background: #f1f1f1;
+    font-size: 0.9em;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .container {
+        max-width: 95%;
+        padding: 15px;
+    }
+    
+    header, nav {
+        text-align: center;
+    }
+
+    .about-title {
+        font-size: 1.2em;
+    }
+
+    p {
+        font-size: 0.9em;
+        line-height: 1.3;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="logo"><h1>Happy Birthday</h1></div>
+        <div class="navlinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="">About</a></li>
+            <li><a href="birthday.html">View All Birthdays</a></li>
+        </div>
+    </div>
+    
+    <div class="cont">
+        <div class="project-title">About This <span style="color: #AE1100;">Project</span></div> <!-- Project title above the container -->
+        <div class="box">
+            <div class="about-text">
+                <p>
+                    Welcome to the Birthday Reminder application! This project helps users keep track of their loved ones' birthdays, ensuring that no special occasion goes unnoticed by sending email reminders as their birthdays approach. Built using HTML, CSS, and JavaScript, it offers a responsive design and utilizes local storage to persist user data, making it a seamless experience for everyone.
+                </p>
+            </div>
+            <div class="about-image">
+                 <!-- Replace with your image URL -->
+                <h2>Madhu <span style="color: #AE1100;"> Kunchala</span></h2> <!-- Your Name -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <h5>Developed and Copyright © Madhu Kunchala</h5>
+    </footer>
+
+    <script src="script.js"></script>  
+</body>
+</html>
