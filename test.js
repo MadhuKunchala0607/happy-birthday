@@ -1,9 +1,6 @@
-// test.js
-
 require('dotenv').config();
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-const moment = require('moment-timezone');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -34,19 +31,18 @@ const transporter = nodemailer.createTransport({
 
 // Function to send birthday emails
 const sendBirthdayEmails = async () => {
-    const today = moment().tz('Asia/Kolkata'); // Set to your timezone
-    const currentMonth = today.month(); // Get current month (0-11)
-    const currentDate = today.date(); // Get current date (1-31)
+    // Get today's date using JavaScript's built-in Date
+    const today = new Date();
+    const currentMonth = today.getMonth(); // Get current month (0-11)
+    const currentDate = today.getDate(); // Get current date (1-31)
 
     console.log(`Checking for birthdays on: ${currentDate}-${currentMonth + 1}`);
 
-    const birthdaysToday = await Birthday.find({
-        $expr: {
-            $and: [
-                { $eq: [{ $dayOfMonth: "$date" }, currentDate] },
-                { $eq: [{ $month: "$date" }, currentMonth + 1] } // Months are 1-indexed in MongoDB
-            ]
-        }
+    // Fetch all birthdays and filter manually for matching day and month
+    const allBirthdays = await Birthday.find({});
+    const birthdaysToday = allBirthdays.filter(birthday => {
+        const birthDate = new Date(birthday.date);
+        return birthDate.getDate() === currentDate && birthDate.getMonth() === currentMonth;
     });
 
     if (birthdaysToday.length === 0) {
@@ -54,11 +50,12 @@ const sendBirthdayEmails = async () => {
         return;
     }
 
-    birthdaysToday.forEach(birthday => {
-        const birthDate = moment(birthday.date);
-        const age = today.diff(birthDate, 'years');
-        const weeks = today.diff(birthDate, 'weeks');
-        const days = today.diff(birthDate, 'days');
+    // Send birthday emails for each matching birthday
+    for (const birthday of birthdaysToday) {
+        const birthDate = new Date(birthday.date);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const weeks = Math.floor((today - birthDate) / (7 * 24 * 60 * 60 * 1000));
+        const days = Math.floor((today - birthDate) / (24 * 60 * 60 * 1000));
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -84,13 +81,13 @@ const sendBirthdayEmails = async () => {
             `
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return console.error('Error sending email:', error);
-            }
-            console.log('Email sent:', info.response);
-        });
-    });
+        try {
+            const info = await transporter.sendMail(mailOptions);
+            console.log(`Email sent to ${birthday.email}:`, info.response);
+        } catch (error) {
+            console.error(`Error sending email to ${birthday.email}:`, error);
+        }
+    }
 };
 
 // Test function to run the email sending process

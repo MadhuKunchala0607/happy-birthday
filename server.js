@@ -81,6 +81,7 @@ const sendBirthdayEmails = async () => {
                 { $eq: [{ $dayOfMonth: "$date" }, todayDate] }
             ]
         }
+      
     });
 
     birthdaysToday.forEach(birthday => {
@@ -133,6 +134,7 @@ cron.schedule('0 0 * * *', () => {
 }, {
     timezone: 'Asia/Kolkata' // Change this to your preferred timezone
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
